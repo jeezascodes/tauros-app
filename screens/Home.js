@@ -7,7 +7,7 @@ import {
   Alert,
   ScrollView,
 } from 'react-native';
-import {Button, Surface, Title, Avatar, Image} from 'react-native-paper';
+import {Button, Surface, Title, Avatar, Image , Subheading} from 'react-native-paper';
 import {useNavigation} from '@react-navigation/native';
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
 
@@ -41,12 +41,25 @@ const Home = ({route}) => {
     }
   };
 
-  const mapCoinToEx = name => {
+  const getTotalBalance = () => {
+    const balances = balanceFiltered.length
+      ? balanceFiltered?.map(item =>
+          mapCoinToEx(item?.coin_name, item?.balances.available),
+        )
+      : [''];
+
+    const total = balances?.reduce(
+      (acc, val) => parseFloat(acc) + parseFloat(val),
+    );
+    return total;
+  };
+
+  const mapCoinToEx = (name, balance) => {
     if (name === 'Test Bitcoin') {
-      return JSON.stringify(exchange.bitcoin.mxn);
+      return (exchange?.bitcoin?.mxn * balance).toFixed(2);
     }
     if (name === 'Test Stellar') {
-      return JSON.stringify(exchange.stellar.mxn);
+      return (exchange?.stellar?.mxn * balance).toFixed(2);
     }
   };
 
@@ -79,7 +92,11 @@ const Home = ({route}) => {
   return (
     <View style={styles.main}>
       <View style={styles.inlineContainer}>
-        <Title>Your Balance</Title>
+        <View>
+          <Title>Total combinado</Title>
+          <Subheading>$ {getTotalBalance()} MXN</Subheading>
+        </View>
+
         <TouchableOpacity
           onPress={() => navigation.navigate('Settings', {nav: navigation})}>
           <Avatar.Image
@@ -90,6 +107,7 @@ const Home = ({route}) => {
       </View>
 
       <View style={styles.tabContainer}>
+        <Title>Wallets</Title>
         <ScrollView>
           {balanceFiltered?.map(item => (
             <Surface style={styles.surface}>
@@ -97,7 +115,9 @@ const Home = ({route}) => {
                 <Text>{item?.coin_name}</Text>
                 <View>
                   <Text>{item?.balances.available}</Text>
-                  <Text>{mapCoinToEx(item?.coin_name)}</Text>
+                  <Text>
+                    $ {mapCoinToEx(item?.coin_name, item?.balances.available)}
+                  </Text>
                 </View>
               </View>
             </Surface>
