@@ -21,26 +21,31 @@ const Confirm = () => {
   }, [tempToken]);
 
   const handleConfirm = async () => {
-    const response = await fetch(
-      'https://api.staging.tauros.io/api/v2/auth/verify-tfa-email/',
-      {
-        body: `{"tempToken": ${sessionToken}, "code": ${sessionCode}, "unique_device_id": "123456789", "device_name": "Motorola"}`,
-        headers: {
-          'Content-Type': 'application/json',
+    try {
+      const response = await fetch(
+        'https://api.staging.tauros.io/api/v2/auth/verify-tfa-email/',
+        {
+          body: `{"tempToken": ${sessionToken}, "code": ${sessionCode}, "unique_device_id": "123456789", "device_name": "Motorola"}`,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
         },
-        method: 'POST',
-      },
-    ).catch(error => Alert.alert('error', error));
-    const result = await response.json();
-    setTempToken(result.payload.token);
-    //Alert.alert(JSON.stringify(result));
-    _storeData('sessionToken', tempToken);
+      );
+      const result = await response.json();
+      setTempToken(result.payload.token);
+      _storeData('sessionToken', tempToken);
+    } catch (error) {
+      Alert.alert(
+        'Error',
+        'Es posible que codigo sea incorrecto, intente de nuevo',
+      );
+    }
   };
-  //_storeData('sessionToken', result.payload.token);
+
   const _storeData = async (key, val) => {
     try {
       await AsyncStorage.setItem(key, JSON.stringify(val));
-      //navigation.navigate('Home', {token: tempToken});
     } catch (error) {
       Alert.alert('error', error);
     }
@@ -69,7 +74,6 @@ const Confirm = () => {
           onChangeText={text => setSessionCode(text)}
         />
       </View>
-      <Text>{tempToken && tempToken}</Text>
 
       <Button mode="contained" onPress={() => handleConfirm()}>
         Verify

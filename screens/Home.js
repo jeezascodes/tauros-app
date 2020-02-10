@@ -6,8 +6,9 @@ import {
   TouchableOpacity,
   Alert,
   ScrollView,
+  Image,
 } from 'react-native';
-import {Button, Surface, Title, Avatar, Image , Subheading} from 'react-native-paper';
+import {Button, Surface, Title, Avatar, Subheading} from 'react-native-paper';
 import {useNavigation} from '@react-navigation/native';
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
 
@@ -28,18 +29,6 @@ const Home = ({route}) => {
     }
     getExchange();
   }, []);
-
-  const _retrieveData = async () => {
-    try {
-      const value = await AsyncStorage.getItem('token');
-      if (value !== null) {
-        Alert.alert('jo', value);
-        //setTempToken(value);
-      }
-    } catch (error) {
-      Alert.alert(error);
-    }
-  };
 
   const getTotalBalance = () => {
     const balances = balanceFiltered.length
@@ -64,17 +53,24 @@ const Home = ({route}) => {
   };
 
   const getBalance = async () => {
-    const response = await fetch(
-      'https://api.staging.tauros.io/api/v1/data/listbalances/',
-      {
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
+    try {
+      const response = await fetch(
+        'https://api.staging.tauros.io/api/v1/data/listbalances/',
+        {
+          headers: {
+            Authorization: `JWT ${token}`,
+            'Content-Type': 'application/json',
+          },
         },
-      },
-    );
-    const result = await response.json();
-    setBalance(result.data.wallets);
+      );
+      const result = await response.json();
+      setBalance(result.data.wallets);
+    } catch (error) {
+      Alert.alert(
+        'Error',
+        'No se pudo obtener su balance, por favor vuelva a iniciar sesion',
+      );
+    }
   };
 
   const getExchange = async () => {
@@ -94,7 +90,9 @@ const Home = ({route}) => {
       <View style={styles.inlineContainer}>
         <View>
           <Title>Total combinado</Title>
-          <Subheading>$ {getTotalBalance()} MXN</Subheading>
+          <Subheading style={styles.totalAmount}>
+            $ {getTotalBalance()} MXN
+          </Subheading>
         </View>
 
         <TouchableOpacity
@@ -112,10 +110,19 @@ const Home = ({route}) => {
           {balanceFiltered?.map(item => (
             <Surface style={styles.surface}>
               <View style={styles.flexContainer}>
-                <Text>{item?.coin_name}</Text>
+                <View style={styles.inlineContainer}>
+                  <Image
+                    style={{width: 50, height: 50}}
+                    source={{
+                      uri: item?.coin_icon,
+                    }}
+                  />
+                  <Text style={styles.coinName}>{item?.coin_name}</Text>
+                </View>
+
                 <View>
-                  <Text>{item?.balances.available}</Text>
-                  <Text>
+                  <Title style={styles.right}>{item?.balances.available}</Title>
+                  <Text style={styles.right}>
                     $ {mapCoinToEx(item?.coin_name, item?.balances.available)}
                   </Text>
                 </View>
@@ -123,6 +130,7 @@ const Home = ({route}) => {
             </Surface>
           ))}
         </ScrollView>
+        <Button onPress={() => navigation.navigate('Login')}>Log out</Button>
       </View>
     </View>
   );
@@ -133,11 +141,13 @@ const styles = StyleSheet.create({
   inlineContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
   },
   flexContainer: {
     width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
   },
   tabContainer: {
     height: 500,
@@ -152,6 +162,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     elevation: 4,
   },
+  totalAmount: {
+    fontSize: 20,
+  },
+  right: {
+    justifyContent: 'flex-start',
+    flexDirection: 'row',
+  },
+  coinName: {
+    marginLeft: 10,
+  }
 });
 
 export default Home;

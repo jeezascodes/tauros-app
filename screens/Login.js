@@ -16,24 +16,28 @@ const Login = () => {
   };
 
   const handleLogin = async () => {
-    const data = {
-      email: userInfo.email,
-      password: userInfo.passWord,
-      unique_device_id: '123456789',
-      device_name: 'Motorola',
-    };
-    const response = await fetch(
-      'https://api.staging.tauros.io/api/v2/auth/signin/',
-      {
-        body: JSON.stringify(data),
-        headers: {
-          'Content-Type': 'application/json',
+    try {
+      const data = {
+        email: userInfo.email,
+        password: userInfo.passWord,
+        unique_device_id: '123456789',
+        device_name: 'Motorola',
+      };
+      const response = await fetch(
+        'https://api.staging.tauros.io/api/v2/auth/signin/',
+        {
+          body: JSON.stringify(data),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
         },
-        method: 'POST',
-      },
-    );
-    const result = await response.json();
-    _storeData('token', result.payload.token);
+      );
+      const result = await response.json();
+      _storeData('token', result.payload.token);
+    } catch (error) {
+      Alert.alert("error", "intentelo de nuevo");
+    }
   };
 
   const _storeData = async (key, val) => {
@@ -44,18 +48,6 @@ const Login = () => {
       Alert.alert('error', error);
     }
   };
-
-  /*const _retrieveData = async () => {
-    try {
-      const value = await AsyncStorage.getItem('user');
-      if (value !== null) {
-        const parsed = JSON.parse(value);
-        setUserInfo(parsed);
-      }
-    } catch (error) {
-      Alert.alert(error);
-    }
-  };*/
 
   return (
     <View style={styles.main}>
