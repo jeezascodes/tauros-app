@@ -20,11 +20,13 @@ const Home = ({route}) => {
   const Tab = createMaterialTopTabNavigator();
   const [tempToken, setTempToken] = useState('hey');
   const [balance, setBalance] = useState([]);
+  const [exchange, setExchange] = useState({});
 
   useEffect(() => {
     if (token) {
       getBalance();
     }
+    getExchange();
   }, []);
 
   const _retrieveData = async () => {
@@ -36,6 +38,15 @@ const Home = ({route}) => {
       }
     } catch (error) {
       Alert.alert(error);
+    }
+  };
+
+  const mapCoinToEx = name => {
+    if (name === 'Test Bitcoin') {
+      return JSON.stringify(exchange.bitcoin.mxn);
+    }
+    if (name === 'Test Stellar') {
+      return JSON.stringify(exchange.stellar.mxn);
     }
   };
 
@@ -51,6 +62,14 @@ const Home = ({route}) => {
     );
     const result = await response.json();
     setBalance(result.data.wallets);
+  };
+
+  const getExchange = async () => {
+    const response = await fetch(
+      'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin%2Cstellar&vs_currencies=mxn',
+    );
+    const result = await response.json();
+    setExchange(result);
   };
 
   const balanceFiltered = balance?.filter(
@@ -69,19 +88,17 @@ const Home = ({route}) => {
           />
         </TouchableOpacity>
       </View>
-      {/*<View style={styles.tabContainer}>
-        <Tab.Navigator>
-          <Tab.Screen name="Products" component={Products} />
-          <Tab.Screen name="Shop" component={Shop} />
-        </Tab.Navigator>
-  </View>*/}
+
       <View style={styles.tabContainer}>
         <ScrollView>
           {balanceFiltered?.map(item => (
             <Surface style={styles.surface}>
               <View style={styles.flexContainer}>
                 <Text>{item?.coin_name}</Text>
-                <Text>{item?.balances.available}</Text>
+                <View>
+                  <Text>{item?.balances.available}</Text>
+                  <Text>{mapCoinToEx(item?.coin_name)}</Text>
+                </View>
               </View>
             </Surface>
           ))}
