@@ -1,6 +1,13 @@
 import React, {useState, useEffect} from 'react';
-import {View, Text, StyleSheet, TouchableOpacity, Alert} from 'react-native';
-import {Button, Surface, Title, Avatar} from 'react-native-paper';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+  ScrollView,
+} from 'react-native';
+import {Button, Surface, Title, Avatar, Image} from 'react-native-paper';
 import {useNavigation} from '@react-navigation/native';
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
 
@@ -46,10 +53,14 @@ const Home = ({route}) => {
     setBalance(result.data.wallets);
   };
 
+  const balanceFiltered = balance?.filter(
+    item => item.balances.available !== '0',
+  );
+
   return (
     <View style={styles.main}>
       <View style={styles.inlineContainer}>
-        <Title>Browse</Title>
+        <Title>Your Balance</Title>
         <TouchableOpacity
           onPress={() => navigation.navigate('Settings', {nav: navigation})}>
           <Avatar.Image
@@ -65,17 +76,17 @@ const Home = ({route}) => {
         </Tab.Navigator>
   </View>*/}
       <View style={styles.tabContainer}>
-        {balance?.map(item => (
-          <Text>{item?.coin_name}</Text>
-        ))}
+        <ScrollView>
+          {balanceFiltered?.map(item => (
+            <Surface style={styles.surface}>
+              <View style={styles.flexContainer}>
+                <Text>{item?.coin_name}</Text>
+                <Text>{item?.balances.available}</Text>
+              </View>
+            </Surface>
+          ))}
+        </ScrollView>
       </View>
-
-      <Button
-        icon="settings"
-        mode="contained"
-        onPress={() => navigation.navigate('Settings', {nav: navigation})}>
-        Go to settings
-      </Button>
     </View>
   );
 };
@@ -86,15 +97,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
+  flexContainer: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
   tabContainer: {
-    height: 450,
+    height: 500,
     marginTop: 10,
   },
   surface: {
     padding: 8,
     margin: 10,
     height: 80,
-    width: '80%',
+    width: '90%',
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 4,
