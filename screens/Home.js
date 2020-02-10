@@ -107,28 +107,32 @@ const Home = ({route}) => {
       <View style={styles.tabContainer}>
         <Title>Wallets</Title>
         <ScrollView>
-          {balanceFiltered?.map(item => (
-            <Surface style={styles.surface}>
-              <View style={styles.flexContainer}>
-                <View style={styles.inlineContainer}>
-                  <Image
-                    style={{width: 50, height: 50}}
-                    source={{
-                      uri: item?.coin_icon,
-                    }}
-                  />
-                  <Text style={styles.coinName}>{item?.coin_name}</Text>
-                </View>
+          <View style={styles.contain}>
+            {balanceFiltered?.map(item => (
+              <Surface style={styles.surface}>
+                <View style={styles.flexContainer}>
+                  <View style={styles.inlineContainer}>
+                    <Image
+                      style={{width: 50, height: 50}}
+                      source={{
+                        uri: item?.coin_icon,
+                      }}
+                    />
+                    <Text style={styles.coinName}>{item?.coin_name}</Text>
+                  </View>
 
-                <View>
-                  <Title style={styles.right}>{item?.balances.available}</Title>
-                  <Text style={styles.right}>
-                    $ {mapCoinToEx(item?.coin_name, item?.balances.available)}
-                  </Text>
+                  <View>
+                    <Title style={styles.right}>
+                      {item?.balances.available}
+                    </Title>
+                    <Text style={styles.right}>
+                      $ {mapCoinToEx(item?.coin_name, item?.balances.available)}
+                    </Text>
+                  </View>
                 </View>
-              </View>
-            </Surface>
-          ))}
+              </Surface>
+            ))}
+          </View>
         </ScrollView>
         <Button onPress={() => navigation.navigate('Login')}>Log out</Button>
       </View>
@@ -157,7 +161,7 @@ const styles = StyleSheet.create({
     padding: 8,
     margin: 10,
     height: 80,
-    width: '90%',
+    width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 4,
@@ -171,7 +175,11 @@ const styles = StyleSheet.create({
   },
   coinName: {
     marginLeft: 10,
-  }
+  },
+  contain: {
+    alignItems: 'center',
+    flexDirection: 'column',
+  },
 });
 
 export default Home;
