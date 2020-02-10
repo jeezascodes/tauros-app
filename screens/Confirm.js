@@ -8,18 +8,19 @@ const Confirm = () => {
   const navigation = useNavigation();
   const [sessionToken, setSessionToken] = useState('');
   const [sessionCode, setSessionCode] = useState('');
+  const [tempToken, setTempToken] = useState('');
 
   useEffect(() => {
     _retrieveData();
   }, []);
 
+  useEffect(() => {
+    if (tempToken !== '') {
+      return navigation.navigate('Home', {token: tempToken});
+    }
+  }, [tempToken]);
+
   const handleConfirm = async () => {
-    const data = {
-      tempToken: sessionToken,
-      code: sessionCode,
-      unique_device_id: '123456789',
-      device_name: 'Motorola',
-    };
     const response = await fetch(
       'https://api.staging.tauros.io/api/v2/auth/verify-tfa-email/',
       {
@@ -29,15 +30,17 @@ const Confirm = () => {
         },
         method: 'POST',
       },
-    );
+    ).catch(error => Alert.alert('error', error));
     const result = await response.json();
-    _storeData('sessionToken', result.payload.token);
+    setTempToken(result.payload.token);
+    //Alert.alert(JSON.stringify(result));
+    _storeData('sessionToken', tempToken);
   };
-
+  //_storeData('sessionToken', result.payload.token);
   const _storeData = async (key, val) => {
     try {
       await AsyncStorage.setItem(key, JSON.stringify(val));
-      navigation.navigate('Home');
+      //navigation.navigate('Home', {token: tempToken});
     } catch (error) {
       Alert.alert('error', error);
     }
@@ -66,6 +69,7 @@ const Confirm = () => {
           onChangeText={text => setSessionCode(text)}
         />
       </View>
+      <Text>{tempToken && tempToken}</Text>
 
       <Button mode="contained" onPress={() => handleConfirm()}>
         Verify
